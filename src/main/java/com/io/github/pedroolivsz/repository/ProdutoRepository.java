@@ -79,10 +79,11 @@ public class ProdutoRepository {
             if(rows == 0) {
                 throw new RepositoryException("Produto não encontrado para remoção.");
             }
-
+            System.out.println("pica");
         } catch (SQLException sqlException) {
             logger.logDatabaseError("Remover o produto do banco de dados", DELETE, id, sqlException);
             throw new RepositoryException("Erro ao deletar o produto. Tente novamente mais tarde.");
+
         }
 
     }

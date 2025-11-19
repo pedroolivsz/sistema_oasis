@@ -58,7 +58,7 @@ public class ProdutoRepository {
             preparedStatement.executeUpdate();
 
         } catch (SQLException sqlException) {
-            log.error("Erro ao editar produto no banco de dados. SQL: {} | Produto: {}", UPDATE, produto);
+            log.error("Erro ao editar produto no banco de dados. SQL: {} | Produto: {}", UPDATE, produto, sqlException);
             throw new RepositoryException("Erro ao editar produto. Tente novamente mais tarde");
         }
 
@@ -73,7 +73,8 @@ public class ProdutoRepository {
             preparedStatement.executeUpdate();
 
         } catch (SQLException sqlException) {
-            throw new RepositoryException("Erro ao deletar o produto.", sqlException);
+            log.error("Erro ao remover o produto do banco de dados. SQL: {} | Id informado: {}", DELETE, id, sqlException);
+            throw new RepositoryException("Erro ao deletar o produto. Tente novamente mais tarde.");
         }
 
     }
@@ -92,7 +93,8 @@ public class ProdutoRepository {
 
             return produtos;
         } catch (SQLException sqlException) {
-            throw new RepositoryException("Erro ao listar produtos.", sqlException);
+            log.error("Erro ao listar os produtos do banco de dados. SQL: {}", LIST_ALL, sqlException);
+            throw new RepositoryException("Erro ao listar produtos.");
         }
 
     }
@@ -111,7 +113,8 @@ public class ProdutoRepository {
             }
 
         } catch (SQLException sqlException) {
-            throw new RepositoryException("Erro ao buscar o produto.", sqlException);
+            log.error("Erro ao procurar o produto por id no banco. SQL: {} | Id informado: {}", FIND_BY_ID, id, sqlException);
+            throw new RepositoryException("Erro ao buscar o produto.");
         }
 
         return Optional.empty();

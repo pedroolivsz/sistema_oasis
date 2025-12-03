@@ -29,7 +29,7 @@ public class ProdutoRepository {
             PreparedStatement preparedStatement = conn.prepareStatement(INSERT, Statement.RETURN_GENERATED_KEYS)) {
 
             preparedStatement.setInt(1, produto.getQuantidade());
-            preparedStatement.setString(2, produto.getNome());
+            preparedStatement.setString(2, produto.getNome().toLowerCase());
             preparedStatement.setBigDecimal(3, produto.getValorUnitario());
             preparedStatement.executeUpdate();
 

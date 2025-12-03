@@ -16,6 +16,12 @@ public class Produto {
         this.valorUnitario = valorUnitario;
     }
 
+    public Produto(int quantidade, String nome, BigDecimal valorUnitario) {
+        this.quantidade = quantidade;
+        this.nome = nome;
+        this.valorUnitario = valorUnitario;
+    }
+
     public Produto() {
 
     }
@@ -54,11 +60,9 @@ public class Produto {
 
     @Override
     public String toString() {
-        return "Produto{" +
-                "id=" + id +
-                ", quantidade=" + quantidade +
-                ", nome='" + nome + '\'' +
-                ", valorUnitario=" + valorUnitario +
-                '}';
+        return "Id: " + id +
+                "| " + nome +
+                "| Quantidade: " + quantidade +
+                "| Valor unitário: " + valorUnitario;
     }
 }

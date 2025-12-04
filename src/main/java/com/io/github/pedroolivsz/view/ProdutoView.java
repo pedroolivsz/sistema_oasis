@@ -2,10 +2,11 @@ package com.io.github.pedroolivsz.view;
 
 import com.io.github.pedroolivsz.controller.ProdutoController;
 import com.io.github.pedroolivsz.dominio.Produto;
-import com.io.github.pedroolivsz.validation.ProdutoValidation;
+import com.io.github.pedroolivsz.validation.ValidationProductData;
 
 import javax.swing.JOptionPane;
 import java.math.BigDecimal;
+import java.util.List;
 
 public class ProdutoView {
     private final ProdutoController produtoController;
@@ -25,12 +26,11 @@ public class ProdutoView {
                 "Valor unitário:",
                 "Cadastro de produto:",
                 JOptionPane.PLAIN_MESSAGE)));
-        if(produtoController.create(nome, quantidade, valorUnitario).equals(ProdutoValidation.SUCESSO)) {
-            JOptionPane.showMessageDialog(null, "Nome: " + nome + "\n" +
-                    "Quantidade: " + quantidade + "\n" +
-                    "Valor unitário: R$" + valorUnitario + "\n" +
-                    "Adicionado com sucesso ao estoque!");
-        }
+        produtoController.create(nome, quantidade, valorUnitario);
+        JOptionPane.showMessageDialog(null, "Nome: " + nome + "\n" +
+                "Quantidade: " + quantidade + "\n" +
+                "Valor unitário: R$" + valorUnitario + "\n" +
+                "Adicionado com sucesso ao estoque!");
     }
     public void updateProduct() {
         int id = Integer.parseInt(JOptionPane.showInputDialog(null,
@@ -49,12 +49,11 @@ public class ProdutoView {
                 "Valor unitário:",
                 "Cadastro de produto:",
                 JOptionPane.PLAIN_MESSAGE)));
-        if(produtoController.update(id, nome, quantidade, valorUnitario).equals(ProdutoValidation.SUCESSO)) {
-            JOptionPane.showMessageDialog(null, "Nome: " + nome + "\n" +
-                    "Quantidade: " + quantidade + "\n" +
-                    "Valor unitário: R$" + valorUnitario + "\n" +
-                    "Editado com sucesso!");
-        }
+        produtoController.update(id, nome, quantidade, valorUnitario);
+        JOptionPane.showMessageDialog(null, "Nome: " + nome + "\n" +
+                "Quantidade: " + quantidade + "\n" +
+                "Valor unitário: R$" + valorUnitario + "\n" +
+                "Editado com sucesso!");
     }
 
     public void deleteProduct() {
@@ -62,16 +61,27 @@ public class ProdutoView {
                 "Id do produto:",
                 "Deletar produto",
                 JOptionPane.PLAIN_MESSAGE));
-        ProdutoValidation produtoValidation = produtoController.delete(id);
-        if(produtoValidation.equals(ProdutoValidation.SUCESSO)) {
-            JOptionPane.showMessageDialog(null, "O produto de ID: " + id +
-                    " foi excluido com sucesso", "Confirmação", JOptionPane.PLAIN_MESSAGE);
-        }
+        produtoController.delete(id);
+        JOptionPane.showMessageDialog(null, "O produto de ID: " + id +
+                " foi excluido com sucesso", "Confirmação", JOptionPane.PLAIN_MESSAGE);
     }
 
     public void listAllProducts() {
+        List<Produto> produtos = produtoController.listAll();
+        if(produtos.isEmpty()) {
+            JOptionPane.showMessageDialog(null,
+                    "Lista vazia",
+                    "Lista de produtos",
+                    JOptionPane.PLAIN_MESSAGE);
+            return;
+        }
+        StringBuilder listaProdutos = new StringBuilder();
+        for(Produto produto : produtos) {
+            listaProdutos.append(produto);
+            listaProdutos.append("\n");
+        }
         JOptionPane.showMessageDialog(null,
-                produtoController.listAll(),
+                listaProdutos,
                 "Lista de produtos",
                 JOptionPane.PLAIN_MESSAGE);
     }

@@ -9,14 +9,14 @@ public class Produto {
     private String nome;
     private BigDecimal valorUnitario;
 
-    public Produto(int id, int quantidade, String nome, BigDecimal valorUnitario) {
+    public Produto(int id, String nome, int quantidade, BigDecimal valorUnitario) {
         this.id = id;
         this.quantidade = quantidade;
         this.nome = nome;
         this.valorUnitario = valorUnitario;
     }
 
-    public Produto(int quantidade, String nome, BigDecimal valorUnitario) {
+    public Produto(String nome, int quantidade, BigDecimal valorUnitario) {
         this.quantidade = quantidade;
         this.nome = nome;
         this.valorUnitario = valorUnitario;

@@ -14,13 +14,11 @@ public class ProdutoController {
     }
 
     public void create(String nome, int quantidade, BigDecimal valorUnitario) {
-        Produto produto = new Produto(quantidade, nome, valorUnitario);
-        produtoService.create(produto);
+        produtoService.create(nome, quantidade, valorUnitario);
     }
 
     public void update(int id, String nome, int quantidade, BigDecimal valorUnitario) {
-        Produto produto = new Produto(id, quantidade, nome, valorUnitario);
-        produtoService.update(produto);
+        produtoService.update(id, nome, quantidade, valorUnitario);
     }
 
     public void delete(int id) {

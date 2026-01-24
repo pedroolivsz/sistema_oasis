@@ -6,7 +6,6 @@ import com.io.github.pedroolivsz.service.ProdutoService;
 import com.io.github.pedroolivsz.viewfx.ProductListView;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 public class MainFX extends Application {
@@ -15,9 +14,8 @@ public class MainFX extends Application {
         ProdutoRepository produtoRepository = new ProdutoRepository();
         ProdutoService produtoService = new ProdutoService(produtoRepository);
         ProdutoController produtoController = new ProdutoController(produtoService);
-        BorderPane borderPane = new BorderPane();
-        ProductListView view = new ProductListView(produtoController, borderPane);
-        Scene scene = new Scene(view.getBorderPane(), 600, 400);
+        ProductListView view = new ProductListView(produtoController);
+        Scene scene = new Scene(view.getRoot(), 600, 400);
 
         stage.setTitle("Lista produtos");
         stage.setScene(scene);

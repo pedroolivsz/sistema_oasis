@@ -84,7 +84,7 @@ public class ProdutoRepository {
     public Product createWithTransaction(Product product) {
         validateProduct(product);
 
-        Connection conn;
+        Connection conn = null;
         try {
             conn = Database.connect();
             conn.setAutoCommit(false);
@@ -165,7 +165,7 @@ public class ProdutoRepository {
                 throw new RepositoryException(ERROR_NOT_FOUND + ". ID: " + id);
             }
 
-            logger.info("Produto atualizado parcialmente. ID: ", id);
+            logger.info("Produto atualizado parcialmente. ID: " + id);
 
             return findById(id)
                     .orElseThrow(() -> new RepositoryException(ERROR_NOT_FOUND + " após a atualização"));
@@ -254,6 +254,16 @@ public class ProdutoRepository {
                 logger.info("Rollback executado com sucesso");
             } catch (SQLException sqlException) {
                 logger.logDatabaseError("Rollback falhou", "", null, sqlException);
+            }
+        }
+    }
+
+    private void closeConnection(Connection conn) {
+        if(conn != null) {
+            try {
+                conn.close();
+            } catch (SQLException sqlException) {
+                logger.logDatabaseError("Erro ao fechar conexão", "", null, sqlException);
             }
         }
     }

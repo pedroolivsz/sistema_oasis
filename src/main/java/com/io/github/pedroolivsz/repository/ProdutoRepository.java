@@ -246,4 +246,15 @@ public class ProdutoRepository {
     private void validateId(int id) {
         if(id < 0) throw new IllegalArgumentException("ID deve ser maior que zero");
     }
+
+    private void rollback(Connection conn) {
+        if(conn != null) {
+            try {
+                conn.rollback();
+                logger.info("Rollback executado com sucesso");
+            } catch (SQLException sqlException) {
+                logger.logDatabaseError("Rollback falhou", "", null, sqlException);
+            }
+        }
+    }
 }

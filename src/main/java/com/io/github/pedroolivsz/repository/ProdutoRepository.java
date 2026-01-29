@@ -10,31 +10,62 @@ import com.io.github.pedroolivsz.dominio.Product;
 import com.io.github.pedroolivsz.logs.LogDatabase;
 import com.io.github.pedroolivsz.rowMapper.ProdutoRowMapper;
 
-/**
- * Repsitory responsável pelas operações de percistência de produtos.
- *
- */
-
 public class ProdutoRepository {
 
+    //=============== Constantes ===============
+
+    //Configurações
+    private static final int DEFAULT_SIZE_PAGE = 20;
+    private static final int MAX_BATCH_SIZE = 1000;
+    private static final int QUERY_TIMEOUT_SECONDS = 30;
+
+    //Mensagens de erro padronizadas
+    private static final String ERROR_CREATE = "Erro ao criar produto";
+    private static final String ERROR_UPDATE = "Erro ao atualizar produto";
+    private static final String ERROR_DELETE = "Erro ao deletar produto";
+    private static final String ERROR_LIST = "Erro ao listar produtos";
+    private static final String ERROR_FIND = "Erro ao procurar produto";
+    private static final String ERROR_NOT_FOUND = "Produto não encontrado";
+
+    //Queries SQL
+    private static final String INSERT =
+            "INSERT INTO produtos (quantidade, nome, valor_unitario) VALUES(?, ?, ?)";
+    private static final String UPDATE =
+            "UPDATE produtos SET quantidade = ?, nome = ?, valor_unitario = ? WHERE id = ?";
+    private static final String DELETE =
+            "DELETE FROM produtos WHERE id = ?";
+    private static final String LIST_ALL =
+            "SELECT id, quantidade, nome, valor_unitario FROM produtos ORDER BY id";
+    private static final String FIND_BY_ID =
+            "SELECT id, quantidade, nome, valor_unitario FROM produtos WHERE id = ?";
+    private static final String EXISTS_BY_NAME =
+            "SELECT COUNT(*) FROM produtos WHERE LOWER(nome) = ?";
+    private static final String COUNT_ALL =
+            "SELECT COUNT(*) FROM produtos";
+    private static final String STATISTICS =
+            "SELECT COUNT(*) as total, " +
+            "COALESCE(SUM(quantidade), 0) as total_quantidade, " +
+            "COALESCE(AVG(valor_unitario), 0) as preco_medio, " +
+            "COALESCE(MIN(valor_unitario), 0) as preco_minimo, " +
+            "COALESCE(MAX(valor_unitario), 0) as preco_maximo" +
+            "FROM produtos";
+
+    //=============== Dependências ===============
 
     private final LogDatabase logger = new LogDatabase(ProdutoRepository.class);
-
     private final ProdutoRowMapper produtoRowMapper = new ProdutoRowMapper();
 
-    private static final String INSERT = "INSERT INTO produtos (quantidade, nome, valor_unitario) VALUES(?, ?, ?)";
-    private static final String UPDATE = "UPDATE produtos SET quantidade = ?, nome = ?, valor_unitario = ? WHERE id = ?";
-    private static final String DELETE = "DELETE FROM produtos WHERE id = ?";
-    private static final String LIST_ALL = "SELECT id, quantidade, nome, valor_unitario FROM produtos ORDER BY id";
-    private static final String FIND_BY_ID = "SELECT id, quantidade, nome, valor_unitario FROM produtos WHERE id = ?";
+    //=============== Métodos CRUD básicos ===============
 
     public Product create(Product product) {
+        //productValidate(product);
         try(Connection conn = Database.connect();
             PreparedStatement preparedStatement = conn.prepareStatement(INSERT, Statement.RETURN_GENERATED_KEYS)) {
 
             preparedStatement.setInt(1, product.getQuantity());
             preparedStatement.setString(2, product.getName().toLowerCase());
             preparedStatement.setBigDecimal(3, product.getUnitValue());
+
             preparedStatement.executeUpdate();
 
             try (ResultSet keys = preparedStatement.getGeneratedKeys()){
@@ -42,30 +73,71 @@ public class ProdutoRepository {
                     product.setId(keys.getInt(1));
                 }
             }
+
+            logger.info("Produto criado com sucesso. ID: " + product.getId());
         } catch(SQLException sqlException) {
             logger.logDatabaseError("Criar produto no banco", INSERT, product, sqlException);
-            throw new RepositoryException("Erro ao criar o produto. Tente novamente mais tarde");
+            throw new RepositoryException(ERROR_CREATE + ". Tente novamente mais tarde");
         }
 
         return product;
     }
 
+    public Product createWithTransaction(Product product) {
+        //validateProduct(product);
+
+        Connection conn;
+        try {
+            conn = Database.connect();
+            conn.setAutoCommit(false);
+
+            try (PreparedStatement preparedStatement = conn.prepareStatement(INSERT, Statement.RETURN_GENERATED_KEYS)){
+                preparedStatement.setInt(1, product.getQuantity());
+                preparedStatement.setString(2, product.getName().toLowerCase());
+                preparedStatement.setBigDecimal(3, product.getUnitValue());
+
+                preparedStatement.executeUpdate();
+
+                try (ResultSet key = preparedStatement.getGeneratedKeys()) {
+                    if(key.next()) product.setId(key.getInt(1));
+                }
+            }
+
+            conn.commit();
+            logger.info("Produto criado com sucesso (Transação). ID: " + product.getId());
+            return product;
+        } catch (SQLException sqlException) {
+            rollback(conn);
+            logger.logDatabaseError("Criar produto com transição", INSERT, product, sqlException);
+            throw new RepositoryException(ERROR_CREATE + " (Transação)", sqlException);
+        } finally {
+            closeConnection(conn);
+        }
+    }
+
     public Product update(Product product) {
+        validateProduct(product);
+        validadeId(product.getId());
+
         try(Connection conn = Database.connect();
             PreparedStatement preparedStatement = conn.prepareStatement(UPDATE)) {
 
             preparedStatement.setInt(1, product.getQuantity());
             preparedStatement.setString(2, product.getName());
             preparedStatement.setBigDecimal(3, product.getUnitValue());
+
             preparedStatement.setInt(4, product.getId());
+
             int rows = preparedStatement.executeUpdate();
 
             if(rows == 0) {
-                throw new RepositoryException("Produto não encontrado para atualização.");
+                throw new RepositoryException(ERROR_NOT_FOUND + " para atualização. ID: " + product.getId());
             }
+
+            logger.info("Produto atualizado com sucesso. ID: " + product.getId());
         } catch (SQLException sqlException) {
             logger.logDatabaseError("Editar produto no banco de dados", UPDATE, product, sqlException);
-            throw new RepositoryException("Erro ao editar produto. Tente novamente mais tarde");
+            throw new RepositoryException(ERROR_UPDATE + ". Tente novamente mais tarde", sqlException);
         }
 
         return product;

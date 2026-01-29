@@ -203,9 +203,11 @@ public class ProdutoRepository {
             while(resultSet.next()) {
                 products.add(produtoRowMapper.map(resultSet));
             }
+
+            logger.info("Listados " + products.size() + " produtos");
         } catch (SQLException sqlException) {
             logger.logDatabaseError("Listar os produtos do banco de dados", LIST_ALL, sqlException);
-            throw new RepositoryException("Erro ao listar produtos. Tente novamente mais tarde.");
+            throw new RepositoryException(ERROR_LIST + ". Tente novamente mais tarde.", sqlException);
         }
 
         return products;

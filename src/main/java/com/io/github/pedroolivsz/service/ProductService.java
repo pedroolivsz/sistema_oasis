@@ -44,15 +44,7 @@ public class ProductService {
         this.produtoRepository = produtoRepository;
     }
 
-    private Product ensureExists(int id) {
-        logger.debug("Verificando existência do produto com ID: {}", id);
 
-        return produtoRepository.findById(id)
-                .orElseThrow(() -> {
-                    logger.warn("Produto não encontrado com ID: {}", id);
-                    return new ProductException("Produto com ID: " + id + " não existe");
-                });
-    }
 
     public Product create(String name, int quantity, BigDecimal unitValue) {
         logger.info("Iniciando criação de produto: nome='{}', quantidade={}, valor={}", name, quantity, unitValue);
@@ -114,6 +106,16 @@ public class ProductService {
     public Product findById(int id) {
         logger.debug("Buscando produto por ID: {}", id);
         return ensureExists(id);
+    }
+
+    private Product ensureExists(int id) {
+        logger.debug("Verificando existência do produto com ID: {}", id);
+
+        return produtoRepository.findById(id)
+                .orElseThrow(() -> {
+                    logger.warn("Produto não encontrado com ID: {}", id);
+                    return new ProductException("Produto com ID: " + id + " não existe");
+                });
     }
 
     private void validateBusinessRules(Product product) {

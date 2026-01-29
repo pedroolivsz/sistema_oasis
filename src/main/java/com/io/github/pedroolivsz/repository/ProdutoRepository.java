@@ -113,7 +113,7 @@ public class ProdutoRepository {
 
     public Product update(Product product) {
         validateProduct(product);
-        validadeId(product.getId());
+        validateId(product.getId());
 
         try(Connection conn = Database.connect();
             PreparedStatement preparedStatement = conn.prepareStatement(UPDATE)) {
@@ -139,7 +139,7 @@ public class ProdutoRepository {
     public Product partialUpdate(int id, Map<String, Object> updates) {
         if(updates == null || updates.isEmpty()) throw new IllegalArgumentException("Nenhuma atualizaçao fornecida");
 
-        validadeId(id);
+        validateId(id);
 
         StringBuilder sql = new StringBuilder("UPDATE produtos SET");
         List<Object> params = new ArrayList<>();
@@ -241,5 +241,9 @@ public class ProdutoRepository {
         if(product.getName() == null || product.getName().trim().isEmpty()) throw new IllegalArgumentException("Nome do produto não pode ser nulo ou vazio");
         if(product.getQuantity() < 0) throw new IllegalArgumentException("Quantidade não pode ser nergativa");
         if(product.getUnitValue() == null || product.getUnitValue().signum() < 0) throw new IllegalArgumentException("Valor unitário deve ser não-nulo e não-negativo");
+    }
+
+    private void validateId(int id) {
+        if(id < 0) throw new IllegalArgumentException("ID deve ser maior que zero");
     }
 }

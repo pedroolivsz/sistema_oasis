@@ -11,6 +11,21 @@ import com.io.github.pedroolivsz.dominio.Product;
 import com.io.github.pedroolivsz.logs.LogDatabase;
 import com.io.github.pedroolivsz.rowMapper.ProdutoRowMapper;
 
+/**
+ * Repository responsável pelas operações de persistência de produtos.
+ *
+ * <p>Esta classe oferece métodos CRUD completos</p>
+ *
+ * <p>Características principais: </p>
+ * <ul>
+ *     <li>Operações CRUD completas com validalção</li>
+ *     <li>Suporte a transações e rollback</li>
+ *     <li>Logging detalhado de erros</li>
+ * </ul>
+ *
+ * @author João Pedro
+ */
+
 public class ProdutoRepository {
 
     //=============== Constantes ===============
@@ -42,6 +57,15 @@ public class ProdutoRepository {
 
     //=============== Métodos CRUD básicos ===============
 
+    /**
+     * Cria um novo produto no banco de dados.
+     *
+     * @param product o produto a ser criado (não pode ser null)
+     * @return o produto criado com o ID gerado
+     * @throws RepositoryException se houver erro na operação
+     * @throws IllegalArgumentException se o produto for null ou inválido
+     */
+
     public Product create(Product product) {
         validateProduct(product);
         try(Connection conn = Database.connect();
@@ -64,6 +88,15 @@ public class ProdutoRepository {
 
         return product;
     }
+
+    /**
+     * Cria um produto dentro de uma transação gerenciada.
+     *
+     * @param product o produto a ser criado
+     * @return o produto criado com o ID gerado
+     * @throws RepositoryException se houver erro na operação
+     * @throws IllegalArgumentException se o produto for null ou inválido
+     */
 
     public Product createWithTransaction(Product product) {
         validateProduct(product);
@@ -95,6 +128,15 @@ public class ProdutoRepository {
         }
     }
 
+    /**
+     * Atualiza um produto existente no banco de dados.
+     *
+     * @param product o produto com os dados atualizados
+     * @return o produto atualizado
+     * @throws RepositoryException se houver erro na operação
+     * @throws IllegalArgumentException se o produto for null ou inválido ou se o id não existir
+     */
+
     public Product update(Product product) {
         validateProduct(product);
         validateId(product.getId());
@@ -119,6 +161,17 @@ public class ProdutoRepository {
 
         return product;
     }
+
+    /**
+     * Atualiza parcialmente um produto existente.
+     * Permite atualizar somente compos específicos.
+     *
+     * @param id o ID do produto
+     * @param updates mapa com os campos a serem atualizados
+     * @return o produto atualizado
+     * @throws RepositoryException se houver erro na operação
+     * @throws IllegalArgumentException se não houver atualizações ou o ID for inválido
+     */
 
     public Product partialUpdate(int id, Map<String, Object> updates) {
         if(updates == null || updates.isEmpty()) throw new IllegalArgumentException("Nenhuma atualizaçao fornecida");
@@ -159,6 +212,14 @@ public class ProdutoRepository {
         }
     }
 
+    /**
+     * Remove um produto do banco de dados.
+     *
+     * @param id o ID do produto a ser removido
+     * @throws RepositoryException se houver erro na operação ou se o produto não existir
+     * @throws IllegalArgumentException se o ID do produto for inválido
+     */
+
     public void delete(int id) {
         validateId(id);
 
@@ -176,6 +237,13 @@ public class ProdutoRepository {
             throw new RepositoryException(ERROR_DELETE + ". Tente novamente mais tarde.", sqlException);
         }
     }
+
+    /**
+     * Lista todos os produtos do banco de dados.
+     *
+     * @return lista com todos os produtos
+     * @throws RepositoryException se houver um erro na operação
+     */
 
     public List<Product> listAll() {
         List<Product> products = new ArrayList<>();
@@ -196,6 +264,15 @@ public class ProdutoRepository {
 
         return products;
     }
+
+    /**
+     * Buscar um produto pelo ID
+     *
+     * @param id o ID do produto
+     * @return optional contendo o produto caso encontrado, vazio caso contrário
+     * @throws RepositoryException se houver erro na operação
+     * @throws IllegalArgumentException se o ID for inválido
+     */
 
     public Optional<Product> findById(int id) {
         validateId(id);
@@ -223,11 +300,26 @@ public class ProdutoRepository {
 
     //=============== Métodos auxiliares privados ===============
 
+    /**
+     * Define os parâmetros do produto no preparedStatement.
+     *
+     * @param preparedStatement a instância do preparedStatement
+     * @param product o produto contendo os parâmetros
+     * @throws SQLException se houver erro na operação
+     */
+
     private void setProductParameters(PreparedStatement preparedStatement, Product product) throws SQLException {
         preparedStatement.setInt(1, product.getQuantity());
         preparedStatement.setString(2, product.getName());
         preparedStatement.setBigDecimal(3, product.getUnitValue());
     }
+
+    /**
+     * Valida se o produto é válido para as operações de banco.
+     *
+     * @param product o produto a ser validado
+     * @throws IllegalArgumentException se algum campo do produto for inválido
+     */
 
     private void validateProduct(Product product) {
         if(product == null) throw new IllegalArgumentException("Produto não pode ser nulo");
@@ -236,9 +328,22 @@ public class ProdutoRepository {
         if(product.getUnitValue() == null || product.getUnitValue().signum() < 0) throw new IllegalArgumentException("Valor unitário deve ser não-nulo e não-negativo");
     }
 
+    /**
+     * Valida se o ID do produto é válido para as operações de banco.
+     *
+     * @param id o ID a ser validado
+     * @throws IllegalArgumentException se o ID for inválido
+     */
+
     private void validateId(int id) {
         if(id < 0) throw new IllegalArgumentException("ID deve ser maior que zero");
     }
+
+    /**
+     * Executa rollback em uma conexão.
+     *
+     * @param conn conexão passada por parâmetro
+     */
 
     private void rollback(Connection conn) {
         if(conn != null) {
@@ -250,6 +355,12 @@ public class ProdutoRepository {
             }
         }
     }
+
+    /**
+     * Fecha uma conexão de forma segura.
+     *
+     * @param conn conexão passada por parâmetro
+     */
 
     private void closeConnection(Connection conn) {
         if(conn != null) {

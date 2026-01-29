@@ -3,6 +3,7 @@ package com.io.github.pedroolivsz.repository;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.io.github.pedroolivsz.config.Database;
@@ -58,13 +59,10 @@ public class ProdutoRepository {
     //=============== Métodos CRUD básicos ===============
 
     public Product create(Product product) {
-        //productValidate(product);
+        validateProduct(product);
         try(Connection conn = Database.connect();
             PreparedStatement preparedStatement = conn.prepareStatement(INSERT, Statement.RETURN_GENERATED_KEYS)) {
-
-            preparedStatement.setInt(1, product.getQuantity());
-            preparedStatement.setString(2, product.getName().toLowerCase());
-            preparedStatement.setBigDecimal(3, product.getUnitValue());
+            setProductParameters(preparedStatement, product);
 
             preparedStatement.executeUpdate();
 
@@ -84,7 +82,7 @@ public class ProdutoRepository {
     }
 
     public Product createWithTransaction(Product product) {
-        //validateProduct(product);
+        validateProduct(product);
 
         Connection conn;
         try {
@@ -92,9 +90,7 @@ public class ProdutoRepository {
             conn.setAutoCommit(false);
 
             try (PreparedStatement preparedStatement = conn.prepareStatement(INSERT, Statement.RETURN_GENERATED_KEYS)){
-                preparedStatement.setInt(1, product.getQuantity());
-                preparedStatement.setString(2, product.getName().toLowerCase());
-                preparedStatement.setBigDecimal(3, product.getUnitValue());
+                setProductParameters(preparedStatement, product);
 
                 preparedStatement.executeUpdate();
 
@@ -121,10 +117,7 @@ public class ProdutoRepository {
 
         try(Connection conn = Database.connect();
             PreparedStatement preparedStatement = conn.prepareStatement(UPDATE)) {
-
-            preparedStatement.setInt(1, product.getQuantity());
-            preparedStatement.setString(2, product.getName());
-            preparedStatement.setBigDecimal(3, product.getUnitValue());
+            setProductParameters(preparedStatement, product);
 
             preparedStatement.setInt(4, product.getId());
 
@@ -141,6 +134,45 @@ public class ProdutoRepository {
         }
 
         return product;
+    }
+
+    public Product partialUpdate(int id, Map<String, Object> updates) {
+        if(updates == null || updates.isEmpty()) throw new IllegalArgumentException("Nenhuma atualizaçao fornecida");
+
+        validadeId(id);
+
+        StringBuilder sql = new StringBuilder("UPDATE produtos SET");
+        List<Object> params = new ArrayList<>();
+
+        updates.forEach((key, value) -> {
+            sql.append(key).append(" = ?, ");
+            params.add(value);
+        });
+
+        sql.setLength(sql.length() - 2); //Remove a última vírgula
+        sql.append(" WHERE id = ?");
+        params.add(id);
+
+        try (Connection conn = Database.connect();
+        PreparedStatement preparedStatement = conn.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                preparedStatement.setObject(i + 1, params.get(i));
+            }
+
+            int rows = preparedStatement.executeUpdate();
+
+            if(rows == 0) {
+                throw new RepositoryException(ERROR_NOT_FOUND + ". ID: " + id);
+            }
+
+            logger.info("Produto atualizado parcialmente. ID: ", id);
+
+            return findById(id)
+                    .orElseThrow(() -> new RepositoryException(ERROR_NOT_FOUND + " após a atualização"));
+        } catch (SQLException sqlException) {
+            logger.logDatabaseError("Atualização parcial", sql.toString(), updates, sqlException);
+            throw new RepositoryException("Erro na atualização parcial", sqlException);
+        }
     }
 
     public void delete(int id) {
@@ -194,5 +226,13 @@ public class ProdutoRepository {
         }
 
         return Optional.empty();
+    }
+
+    //=============== Métodos auxiliares privados ===============
+
+    private void setProductParameters(PreparedStatement preparedStatement, Product product) throws SQLException {
+        preparedStatement.setInt(1, product.getQuantity());
+        preparedStatement.setString(2, product.getName());
+        preparedStatement.setBigDecimal(3, product.getUnitValue());
     }
 }

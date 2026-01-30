@@ -150,7 +150,7 @@ public class ProductService {
 
             logger.info("Produto deletado com sucesso. ID: {}, nome = '{}'", id, existing.getName());
         } catch (ProductException e) {
-            logger.error("Tentativa de deletar produto inexistente. ID: {}", id, e);
+            logger.warn("Tentativa de deletar produto inexistente. ID: {}", id, e);
             throw e;
         } catch (RepositoryException e) {
             logger.error("Erro ao deletar produto ID {} do banco de dados", id, e);
@@ -163,10 +163,16 @@ public class ProductService {
 
     public List<Product> listAll() {
         logger.debug("Listando todos os produtos");
-        List<Product> products = produtoRepository.listAll();
-        logger.debug("Total de produtos encontrados: {}", products.size());
 
-        return List.copyOf(products);
+        try {
+            List<Product> products = produtoRepository.listAll();
+            logger.debug("Total de produtos encontrados: {}", products.size());
+
+            return List.copyOf(products);
+        } catch (RepositoryException e) {
+            logger.error("Erro ao listar produtos", e);
+            throw new ServiceException("Erro ao listar produtos", e);
+        }
     }
 
     public Product findById(int id) {

@@ -210,6 +210,40 @@ public class ProductService {
         }
     }
 
+    public Product removeStock(int id, int quantity) {
+        logger.info("Removendo {} unidades do estoque do produto ID: {}", quantity, id);
+
+        if(quantity <= 0) {
+            throw new ProductException(ERROR_INVALID_QUANTITY);
+        }
+
+        try {
+            Product product = ensureExists(id);
+
+            if(product.getQuantity() < quantity) {
+                String error = String.format(ERROR_INSUFFICIENT_STOCK, product.getQuantity(), quantity);
+
+                logger.warn(error);
+                throw new ProductException(error);
+            }
+
+            int newQuantity = product.getQuantity() - quantity;
+            product.setQuantity(newQuantity);
+
+            Product updated = produtoRepository.update(product);
+
+            logger.info("Estoque reduzido. ID: {}, Quantidade anterior: {}, Nova quantidade: {}",
+                    id, product.getQuantity() - quantity, newQuantity);
+
+            return updated;
+        } catch (ProductException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Erro ao remover estoque do produto ID {}", id, e);
+            throw new ServiceException("Erro ao remover estoque", e);
+        }
+    }
+
     private Product ensureExists(int id) {
         logger.debug("Verificando existência do produto com ID: {}", id);
 

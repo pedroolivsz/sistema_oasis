@@ -177,7 +177,13 @@ public class ProductService {
 
     public Product findById(int id) {
         logger.debug("Buscando produto por ID: {}", id);
-        return ensureExists(id);
+
+        try {
+            return ensureExists(id);
+        } catch (RepositoryException e) {
+            logger.error("Erro ao buscar produto ID {}", id, e);
+            throw new ServiceException("Erro ao buscar produto", e);
+        }
     }
 
     private Product ensureExists(int id) {

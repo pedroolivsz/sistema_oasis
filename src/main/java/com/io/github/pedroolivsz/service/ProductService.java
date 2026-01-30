@@ -73,7 +73,7 @@ public class ProductService {
     }
 
     public Product createWithTransaction(String name, int quantity, BigDecimal unitValue) {
-        logger.info("Iniciando criação de produto (transação): nome='{}', quantidade={}, valor={}", name, quantity, unitValue);
+        logger.info("Iniciando criação de produto (transação): '{}'", name);
 
         try {
             Product product = new Product(name, quantity, unitValue);
@@ -83,7 +83,7 @@ public class ProductService {
 
             Product created = produtoRepository.createWithTransaction(product);
 
-            logger.info("Produto criado com sucesso. ID: {}, nome: '{}'", created.getId(), created.getName());
+            logger.info("Produto criado com transação. ID: {}, nome: '{}'", created.getId(), created.getName());
 
             return created;
         } catch (Exception e) {

@@ -2,6 +2,7 @@ package com.io.github.pedroolivsz.service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import com.io.github.pedroolivsz.dominio.Product;
 import com.io.github.pedroolivsz.repository.ProdutoRepository;
@@ -156,5 +157,21 @@ public class ProductService {
     private void validateBusinessRules(Product product) {
         if(product.getQuantity() < 0) throw new ProductException("Quantidade não pode ser negotiva");
         if(product.getUnitValue().compareTo(BigDecimal.ZERO) < 0) throw new ProductException("Valor não pode ser negativo");
+    }
+
+    private void validatePartialUpdate(Map<String, Object> updates) {
+        if(updates.containsKey("quantidade")) {
+            Object quantity = updates.get("quantidade");
+            if(quantity instanceof Integer && (Integer) quantity < 0) {
+                throw new ServiceException("Quantidade não pode ser negativa");
+            }
+        }
+
+        if(updates.containsKey("valor_unitario")) {
+            Object value = updates.get("valor_unitario");
+            if(value instanceof BigDecimal && ((BigDecimal) value).compareTo(BigDecimal.ZERO) < 0) {
+                throw new ServiceException("Valor unitario não pode ser negativo");
+            }
+        }
     }
 }

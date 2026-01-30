@@ -186,6 +186,30 @@ public class ProductService {
         }
     }
 
+    public Product addStock(int id, int quantity) {
+        logger.info("Adicionando {} unidades ao estoque do produto ID: {}", quantity, id);
+
+        if(quantity < 0) {
+            throw new ProductException(ERROR_INVALID_QUANTITY);
+        }
+
+        try {
+            Product product = ensureExists(id);
+            int newQuantity = product.getQuantity() + quantity;
+
+            product.setQuantity(newQuantity);
+            Product updated = produtoRepository.update(product);
+
+            logger.info("Estoque atualizado. ID: {}, Nova quantidade: {}, Quantidade anterior: {}",
+                    id, newQuantity, product.getQuantity() - quantity);
+
+            return updated;
+        } catch (Exception e) {
+            logger.error("Erro ao adicionar estoque ao produto ID {}", id, e);
+            throw new ServiceException("Erro ao adicionar estoque", e);
+        }
+    }
+
     private Product ensureExists(int id) {
         logger.debug("Verificando existência do produto com ID: {}", id);
 

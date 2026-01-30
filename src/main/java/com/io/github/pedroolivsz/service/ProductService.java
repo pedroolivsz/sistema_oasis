@@ -122,6 +122,23 @@ public class ProductService {
         }
     }
 
+    public Product partialUpdate(int id, Map<String, Object> updates) {
+        logger.info("Iniciando atualização parcial do produto ID: {} - campos: {}", id, updates.keySet());
+
+        try {
+            ensureExists(id);
+            validatePartialUpdate(updates);
+
+            Product updated = produtoRepository.partialUpdate(id, updates);
+            logger.info("Produto ID {} atualizado parcialmente com sucesso", id);
+
+            return updated;
+        } catch (Exception e) {
+            logger.error("Erro ao atualizar parcialmente o produto ID: {}", id, e);
+            throw new ServiceException("Erro na atualização parcial", e);
+        }
+    }
+
     public void delete(int id) {
         logger.info("Deletando produto ID: {}", id);
 

@@ -140,12 +140,25 @@ public class ProductService {
     }
 
     public void delete(int id) {
-        logger.info("Deletando produto ID: {}", id);
+        logger.info("Iniciando exclusão do produto ID: {}", id);
 
-        ensureExists(id);
-        produtoRepository.delete(id);
+        try {
+            Product existing = ensureExists(id);
+            validateBusinessRules(existing);
 
-        logger.info("Produto deletado com sucesso. ID: {}", id);
+            produtoRepository.delete(id);
+
+            logger.info("Produto deletado com sucesso. ID: {}, nome = '{}'", id, existing.getName());
+        } catch (ProductException e) {
+            logger.error("Tentativa de deletar produto inexistente. ID: {}", id, e);
+            throw e;
+        } catch (RepositoryException e) {
+            logger.error("Erro ao deletar produto ID {} do banco de dados", id, e);
+            throw new ServiceException("Erro ao deletar produto", e);
+        } catch (Exception e) {
+            logger.error("Erro inesperado ao deletar produto ID {}", id, e);
+            throw new ServiceException("Erro inesperado ao deletar produto", e);
+        }
     }
 
     public List<Product> listAll() {

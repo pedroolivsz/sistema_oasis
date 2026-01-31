@@ -244,6 +244,30 @@ public class ProductService {
         }
     }
 
+    public Product updatePrice(int id, BigDecimal newPrice) {
+        logger.info("Atualizando preço do produto ID: {} para {}", id, newPrice);
+
+        if(newPrice == null || newPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new ProductException(ERROR_INVALID_PRICE);
+        }
+
+        try {
+            Product product = ensureExists(id);
+            BigDecimal oldPrice = product.getUnitValue();
+
+            product.setUnitValue(newPrice);
+            Product updated = produtoRepository.update(product);
+
+            logger.info("Preço atualizado. ID: {}, Preço anterior: {}, Novo preço: {}",
+                    id, product.getUnitValue(), oldPrice);
+
+            return updated;
+        } catch (Exception e) {
+            logger.error("Erro ao atualizar o preço do produto ID {}", id, e);
+            throw new ServiceException("Erro ao atualizar preço", e);
+        }
+    }
+
     private Product ensureExists(int id) {
         logger.debug("Verificando existência do produto com ID: {}", id);
 

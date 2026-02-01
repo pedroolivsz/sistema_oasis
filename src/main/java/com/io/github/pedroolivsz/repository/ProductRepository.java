@@ -26,7 +26,7 @@ import com.io.github.pedroolivsz.rowMapper.ProdutoRowMapper;
  * @author João Pedro
  */
 
-public class ProdutoRepository {
+public class ProductRepository {
     //=============== Constantes ===============
 
     //Mensagens de erro padronizadas
@@ -51,7 +51,7 @@ public class ProdutoRepository {
 
     //=============== Dependências ===============
 
-    private final LogDatabase logger = new LogDatabase(ProdutoRepository.class);
+    private final LogDatabase logger = new LogDatabase(ProductRepository.class);
     private final ProdutoRowMapper produtoRowMapper = new ProdutoRowMapper();
 
     //=============== Métodos CRUD básicos ===============

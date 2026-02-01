@@ -1,7 +1,7 @@
 package com.io.github.pedroolivsz;
 
 import com.io.github.pedroolivsz.controller.ProdutoController;
-import com.io.github.pedroolivsz.repository.ProdutoRepository;
+import com.io.github.pedroolivsz.repository.ProductRepository;
 import com.io.github.pedroolivsz.service.ProductService;
 import com.io.github.pedroolivsz.viewfx.ProductListView;
 import javafx.application.Application;
@@ -11,8 +11,8 @@ import javafx.stage.Stage;
 public class MainFX extends Application {
     @Override
     public void start(Stage stage) throws Exception {
-        ProdutoRepository produtoRepository = new ProdutoRepository();
-        ProductService productService = new ProductService(produtoRepository);
+        ProductRepository productRepository = new ProductRepository();
+        ProductService productService = new ProductService(productRepository);
         ProdutoController produtoController = new ProdutoController(productService);
         ProductListView view = new ProductListView(produtoController);
         Scene scene = new Scene(view.getRoot(), 600, 400);

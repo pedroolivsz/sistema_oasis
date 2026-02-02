@@ -75,7 +75,7 @@ public class ProductService {
 
         try {
             //Validação básica
-            Product product = new Product(name, quantity, unitValue);
+            Product product = new Product(name.toLowerCase(), quantity, unitValue);
             ProductValidator.validateProduct(product);
 
             //Regras de negócio adicionais
@@ -112,7 +112,7 @@ public class ProductService {
         logger.info("Iniciando criação de produto (transação): '{}'", name);
 
         try {
-            Product product = new Product(name, quantity, unitValue);
+            Product product = new Product(name.toLowerCase(), quantity, unitValue);
             ProductValidator.validateProduct(product);
 
             validateBusinessRules(product);
@@ -146,7 +146,7 @@ public class ProductService {
             Product existing = ensureExists(id);
             logger.debug("Produto encontrado para atualização: {}", existing.getId());
 
-            Product product = new Product(id, nome, quantidade, valorUnitario);
+            Product product = new Product(id, nome.toLowerCase(), quantidade, valorUnitario);
             ProductValidator.validateProduct(product);
             validateBusinessRules(product);
 

@@ -3,11 +3,11 @@ package com.io.github.pedroolivsz.dominio;
 public class Mesa {
 
     private int numeroMesa;
-    private Comanda comanda;
+    private OrderTab orderTab;
     
     public Mesa(int numeroMesa) {
         this.numeroMesa = numeroMesa;
-        this.comanda = new Comanda();
+        this.orderTab = new OrderTab();
     }
 
     public int getNumeroMesa() {
@@ -18,12 +18,12 @@ public class Mesa {
         this.numeroMesa = numeroMesa;
     }
 
-    public Comanda getComanda() {
-        return comanda;
+    public OrderTab getComanda() {
+        return orderTab;
     }
 
-    public void setComanda(Comanda comanda) {
-        this.comanda = comanda;
+    public void setComanda(OrderTab orderTab) {
+        this.orderTab = orderTab;
     }
 
 }

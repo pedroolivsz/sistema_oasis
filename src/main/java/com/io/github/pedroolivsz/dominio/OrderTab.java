@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OrderTab {
-
     private int id;
     private int tableNumber;
     private List<Product> products;
@@ -52,7 +51,4 @@ public class OrderTab {
     public void setId(int id) {
         this.id = id;
     }
-
-    
-
 }
